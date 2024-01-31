@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Text Extractor</title>
+</head>
+<body>
+    <h1>URL Text Extractor</h1>
+
+    <form id="urlForm">
+        <label for="urlInput">Enter URL:</label>
+        <input type="text" id="urlInput" name="url" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="result">
+        <h2>Extracted Text:</h2>
+        <p id="extractedText"></p>
+    </div>
+
+    <script>
+        document.getElementById("urlForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const url = document.getElementById("urlInput").value;
+            fetch('http://localhost:5000/extract-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'url': url }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("extractedText").textContent = data.text_content;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
+
