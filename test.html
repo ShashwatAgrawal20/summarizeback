@@ -11,7 +11,8 @@
     <form id="urlForm">
         <label for="urlInput">Enter URL:</label>
         <input type="text" id="urlInput" name="url" required>
-        <button type="submit">Submit</button>
+        <button type="submit" id="extract">Extract</button>
+        <button type="submit" id="summary">Summarize</button>
     </form>
 
     <div id="result">
@@ -19,8 +20,13 @@
         <p id="extractedText"></p>
     </div>
 
+    <div class="reult2">
+        <h2>Summarized Text:</h2>
+        <p id="SummarizedText"></p>
+    </div>
+
     <script>
-        document.getElementById("urlForm").addEventListener("submit", function(event) {
+        document.getElementById("extract").addEventListener("click", function(event) {
             event.preventDefault();
 
             const url = document.getElementById("urlInput").value;
@@ -34,6 +40,23 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById("extractedText").textContent = data.text_content;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+        document.getElementById("summary").addEventListener("click", function(event) {
+            event.preventDefault();
+
+            const url = document.getElementById("urlInput").value;
+            fetch('http://localhost:5000/summarize-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'url': url }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("SummarizedText").textContent = data.text_content;
             })
             .catch(error => console.error('Error:', error));
         });
