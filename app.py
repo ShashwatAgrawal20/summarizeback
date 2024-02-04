@@ -1,81 +1,52 @@
+from __future__ import absolute_import
+from __future__ import division, print_function, unicode_literals
+
+from sumy.parsers.html import HtmlParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from newspaper import Article
-from transformers import pipeline
-from urllib.parse import urlparse
+
 
 app = Flask(__name__)
 CORS(app)
+LANGUAGE = "english"
 
 
-def extract_text_from_url(url):
-    try:
-        article = Article(url)
-        article.download()
-        article.parse()
-        text_content = article.text
-        return text_content
-    except Exception as e:
-        return f"Error extracting text: {str(e)}"
+def get_summary(url, sentences_count):
+    parser = HtmlParser.from_url(url, Tokenizer(LANGUAGE))
+    stemmer = Stemmer(LANGUAGE)
+
+    summarizer = Summarizer(stemmer)
+    summarizer.stop_words = get_stop_words(LANGUAGE)
+
+    summarized_text = ""
+    for sentence in summarizer(parser.document, sentences_count):
+        summarized_text += str(sentence) + " "
+    return summarized_text
 
 
-@app.route('/extract-text', methods=['POST'])
-def extract_text():
+@app.route("/summarize", methods=["POST"])
+def main():
     try:
         data = request.get_json()
-        url = data.get('url')
+        url = data.get("url")
+        length = data.get("length") or 15
 
         if not url:
             return jsonify(
-                {'error': 'Please provide a valid URL in the request body'}),
+                {"error": "Please provide a valid URL in the request body"}),
             400
 
-        text_content = extract_text_from_url(url)
-        return jsonify({'text_content': text_content})
+        summarized_text = get_summary(url, length)
+        return jsonify({"summarized_text": summarized_text})
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-def is_valid_url(url):
-    try:
-        result = urlparse(url)
-        return all([result.scheme, result.netloc])
-    except ValueError:
-        return False
-    
-def summarize_text_from_url(url):
-    try:
-        if is_valid_url(url):
-            urltext = extract_text_from_url(url)
-        else:
-         urltext = url
-
-        summarizer = pipeline("summarization")
-        text = urltext
-        summary = summarizer(text, max_length=1000, min_length=100, length_penalty=2.0)
-        summarycontent = summary[0]['summary_text']
-        return summarycontent
-    except Exception as e:
-            return f"Error summarizing text: {str(e)}"
+        return jsonify({"error": str(e)}), 500
 
 
-@app.route('/summarize-text', methods=['POST'])
-def summarize_text():
-    try:
-        data = request.get_json()
-        url = data.get('url')
-
-        if not url:
-            return jsonify(
-                {'error': 'Please provide a valid text content in the request body'}),
-            400
-
-        text_content = summarize_text_from_url(url)
-        return jsonify({'text_content': text_content})
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
