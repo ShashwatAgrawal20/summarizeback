@@ -16,31 +16,14 @@ app = Flask(__name__)
 CORS(app)
 LANGUAGE = "english"
 
-'''
-I am aware of the code duplication for `text and url` summarization,
-it was intentional as if I don't do that and try to make the code more
-generic then the HTMLParser content has to be manually parsed in text
-which is more computationally heavy.
-'''
 
+def get_summary(url=None, text=None, sentences_count=None):
+    if url:
+        parser = HtmlParser.from_url(url, Tokenizer(LANGUAGE))
+    else:
+        parser = PlaintextParser.from_string(text, Tokenizer(LANGUAGE))
 
-def get_url_summary(url, sentences_count):
-    parser = HtmlParser.from_url(url, Tokenizer(LANGUAGE))
     stemmer = Stemmer(LANGUAGE)
-
-    summarizer = Summarizer(stemmer)
-    summarizer.stop_words = get_stop_words(LANGUAGE)
-
-    summarized_text = ""
-    for sentence in summarizer(parser.document, sentences_count):
-        summarized_text += str(sentence) + " "
-    return summarized_text
-
-
-def get_text_summary(text, sentences_count):
-    parser = PlaintextParser.from_string(text, Tokenizer(LANGUAGE))
-    stemmer = Stemmer(LANGUAGE)
-
     summarizer = Summarizer(stemmer)
     summarizer.stop_words = get_stop_words(LANGUAGE)
 
@@ -59,11 +42,10 @@ def main():
         raw_text = data.get("text")
 
         if not url and not raw_text:
-            return jsonify({"error": "You have to provide Something"}), 400
-        if url:
-            summarized_text = get_url_summary(url, length)
-        else:
-            summarized_text = get_text_summary(raw_text, length)
+            return jsonify({"error": "URL or text is required"}), 400
+
+        summarized_text = get_summary(
+            url=url, text=raw_text, sentences_count=length)
 
         return jsonify({"summarized_text": summarized_text})
 

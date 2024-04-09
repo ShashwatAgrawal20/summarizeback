@@ -4,64 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A Shitty Summarization tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        p {
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <h1>A Shitty Summarization tool</h1>
+    <div class="container">
+        <h1>A Shitty Summarization tool</h1>
 
-    <form id="inputForm">
-        <label for="urlInput">Enter URL:</label>
-        <input type="text" id="urlInput" name="url">
-        <label for="length">Summary Length:</label>
-        <input type="number" id="length" name="length" required>
-        <button type="submit" id="summaryURL">Summarize URL</button>
-    </form>
+        <form id="inputForm">
+            <label for="urlInput">Enter URL:</label>
+            <input type="text" id="urlInput" name="url">
+            <label for="textInput">Or paste Text:</label>
+            <textarea id="textInput" name="text" rows="5" cols="50"></textarea>
+            <label for="length">Summary Length:</label>
+            <input type="number" id="length" name="length" required>
+            <button type="submit" id="summarizeButton">Summarize</button>
+        </form>
 
-    <form id="textForm">
-        <label for="textInput">Paste Text:</label>
-        <textarea id="textInput" name="text" rows="5" cols="50"></textarea>
-        <button type="submit" id="summaryText">Summarize Text</button>
-    </form>
-
-    <div class="result">
-        <h2>Summarized Text:</h2>
-        <p id="summarizedText"></p>
+        <div class="result">
+            <h2>Summarized Text:</h2>
+            <p id="summarizedText"></p>
+        </div>
     </div>
 
     <script>
-        document.getElementById("summaryURL").addEventListener("click", function(event) {
+        document.getElementById("inputForm").addEventListener("submit", function(event) {
             event.preventDefault();
 
             const url = document.getElementById("urlInput").value;
-            const length = document.getElementById("length").value;
-            fetch('http://localhost:5000/summarize', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 'url': url, 'length': +length }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("summarizedText").textContent = data.summarized_text;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                console.log('Response Status:', error.response.status);
-                console.log('Response Text:', error.response.statusText);
-            });
-        });
-
-        document.getElementById("summaryText").addEventListener("click", function(event) {
-            event.preventDefault();
-
             const text = document.getElementById("textInput").value;
             const length = document.getElementById("length").value;
+
+            let requestBody = {};
+
+            if (url) {
+                requestBody = { 'url': url, 'length': +length };
+            } else if (text) {
+                requestBody = { 'text': text, 'length': +length };
+            }
+
             fetch('http://localhost:5000/summarize', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ 'text': text, 'length': +length }),
+                body: JSON.stringify(requestBody),
             })
             .then(response => response.json())
             .then(data => {
