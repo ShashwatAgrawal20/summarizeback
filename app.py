@@ -27,7 +27,6 @@ def get_summary(url=None, text=None, keyword=None, sentences_count=None):
         try:
             wiki_url = page(keyword).url
         except exceptions.DisambiguationError as e:
-            print(f"DisambiguationError: {e.options}")
             wiki_url = page(e.options[0]).url
         except exceptions.PageError:
             return jsonify({"error": f"No Wikipedia \
