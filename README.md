@@ -32,11 +32,12 @@ nltk.download('punkt')
 1. Activate the venv
 2. Start the `flask` app -> `flask run`
 3. Make a POST request to `/summarize` endpoint.
-You can send 3 params
+You can send 4 params
 1 -> url
 2 -> raw text
-3 -> length -> defaults to 15
-> If both url and text are provided it will summarize the url content.
+3 -> keyword
+4 -> length -> defaults to 15
+> If both url, text and keyword are provided it will summarize the url content.
 1. URL Summarization
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"url": "https://example.com"}' http://127.0.0.1:5000/summarize
@@ -45,6 +46,10 @@ curl -X POST -H "Content-Type: application/json" -d '{"url": "https://example.co
 > Make sure while testing from the CLI you don't want the new line character in your json payload
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"text": "The Domain Name System (DNS) is a hierarchical and distributed naming system for computers, services, and other resources in the Internet or other Internet Protocol (IP) networks. It associates various information with domain names (identification strings) assigned to each of the associated entities. Most prominently, it translates readily memorized domain names to the numerical IP addresses needed for locating and identifying computer services and devices with the underlying network protocols.[1] The Domain Name System has been an essential component of the functionality of the Internet since 1985.", "length": "3"}' http://127.0.0.1:5000/summarize
+```
+3. Keyword Summarization
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"keyword":"gcc compiler", "length": "30"}' http://127.0.0.1:5000/summarize
 ```
 OR
 Use the provided `test.html` to make your life easier.

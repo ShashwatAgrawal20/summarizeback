@@ -76,8 +76,10 @@
             <input type="text" id="urlInput" name="url">
             <label for="textInput">Or paste Text:</label>
             <textarea id="textInput" name="text" rows="5" cols="50"></textarea>
+            <label for="keywordInput">Keywords:</label>
+            <input type="text" id="keywordInput" name="keyword">
             <label for="length">Summary Length:</label>
-            <input type="number" id="length" name="length" required>
+            <input type="number" id="length" name="length" value="15">
             <button type="submit" id="summarizeButton">Summarize</button>
         </form>
 
@@ -93,15 +95,15 @@
 
             const url = document.getElementById("urlInput").value;
             const text = document.getElementById("textInput").value;
+            const keyword = document.getElementById("keywordInput").value;
             const length = document.getElementById("length").value;
 
-            let requestBody = {};
-
-            if (url) {
-                requestBody = { 'url': url, 'length': +length };
-            } else if (text) {
-                requestBody = { 'text': text, 'length': +length };
+            if (!url && !text && !keyword) {
+                alert("Please enter URL or Text or Keywords");
+                return;
             }
+
+            let requestBody = { 'url': url, 'text': text, 'keyword': keyword, 'length': +length };
 
             fetch('http://localhost:5000/summarize', {
                 method: 'POST',
