@@ -26,12 +26,13 @@ def get_summary(url=None, text=None, keyword=None, sentences_count=None):
     else:
         mediawiki = MediaWikiAPI()
         try:
-            wiki_url = mediawiki.page(keyword).url
+            wiki_url = mediawiki.page(keyword, auto_suggest=False).url
         except exceptions.PageError:
             search_results = mediawiki.search(keyword)
             if not search_results:
                 return jsonify({"error": "No search results found"}), 404
-            wiki_url = mediawiki.page(search_results[0]).url
+            wiki_url = mediawiki.page(
+                search_results[0], auto_suggest=False).url
 
         parser = HtmlParser.from_url(wiki_url, Tokenizer(LANGUAGE))
 
