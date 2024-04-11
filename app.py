@@ -11,7 +11,7 @@ from sumy.utils import get_stop_words
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from wikipedia import page, exceptions
+from mediawikiapi import MediaWikiAPI, exceptions
 
 app = Flask(__name__)
 CORS(app)
@@ -24,13 +24,15 @@ def get_summary(url=None, text=None, keyword=None, sentences_count=None):
     elif text:
         parser = PlaintextParser.from_string(text, Tokenizer(LANGUAGE))
     else:
+        mediawiki = MediaWikiAPI()
         try:
-            wiki_url = page(keyword).url
-        except exceptions.DisambiguationError as e:
-            wiki_url = page(e.options[0]).url
+            wiki_url = mediawiki.page(keyword, auto_suggest=False).url
         except exceptions.PageError:
-            return jsonify({"error": f"No Wikipedia \
-            page found for keyword: {keyword}"}), 404
+            search_results = mediawiki.search(keyword)
+            if not search_results:
+                return jsonify({"error": "No search results found"}), 404
+            wiki_url = mediawiki.page(
+                search_results[0], auto_suggest=False).url
 
         parser = HtmlParser.from_url(wiki_url, Tokenizer(LANGUAGE))
 
@@ -41,7 +43,7 @@ def get_summary(url=None, text=None, keyword=None, sentences_count=None):
     summarized_text = ""
     for sentence in summarizer(parser.document, sentences_count):
         summarized_text += str(sentence) + " "
-    return summarized_text
+    return jsonify({"summarized_text": summarized_text})
 
 
 @app.route("/summarize", methods=["POST"])
@@ -59,7 +61,7 @@ def main():
         summarized_text = get_summary(
             url=url, text=raw_text, keyword=keyword, sentences_count=length)
 
-        return jsonify({"summarized_text": summarized_text})
+        return summarized_text
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
