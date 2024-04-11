@@ -14,6 +14,7 @@ Jinja2==3.1.3
 joblib==1.3.2
 lxml==5.1.0
 MarkupSafe==2.1.5
+mediawikiapi==1.2
 nltk==3.8.1
 numpy==1.26.3
 pycountry==23.12.11
@@ -24,4 +25,3 @@ sumy==0.11.0
 tqdm==4.66.1
 urllib3==2.2.0
 Werkzeug==3.0.1
-wikipedia==1.4.0
