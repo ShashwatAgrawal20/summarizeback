@@ -20,6 +20,7 @@ numpy==1.26.3
 pycountry==23.12.11
 regex==2023.12.25
 requests==2.31.0
+setuptools==72.1.0
 soupsieve==2.5
 sumy==0.11.0
 tqdm==4.66.1
