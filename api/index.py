@@ -7,12 +7,14 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
+import nltk
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from mediawikiapi import MediaWikiAPI, exceptions
 
+nltk.download('punkt')
 app = Flask(__name__)
 CORS(app)
 LANGUAGE = "english"
