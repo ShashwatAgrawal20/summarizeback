@@ -7,17 +7,30 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
+
 import nltk
+import os
+
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from mediawikiapi import MediaWikiAPI, exceptions
 
-nltk.download('punkt')
 app = Flask(__name__)
 CORS(app)
 LANGUAGE = "english"
+
+
+# Some beautiful magic happens here.
+nltk_data_dir = os.path.join(os.getcwd(), 'nltk_data')
+if not os.path.exists(nltk_data_dir):
+    os.makedirs(nltk_data_dir)
+nltk.data.path.append(nltk_data_dir)
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', download_dir=nltk_data_dir)
 
 
 def get_summary(url=None, text=None, keyword=None, sentences_count=None):
