@@ -8,6 +8,7 @@ from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
+
 import nltk
 import os
 
@@ -21,16 +22,9 @@ app = Flask(__name__)
 CORS(app)
 LANGUAGE = "english"
 
-
-# Some beautiful magic happens here.
-nltk_data_dir = os.path.join(os.getcwd(), 'nltk_data')
-if not os.path.exists(nltk_data_dir):
-    os.makedirs(nltk_data_dir)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+nltk_data_dir = os.path.join(current_dir, 'nltk_data')
 nltk.data.path.append(nltk_data_dir)
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', download_dir=nltk_data_dir)
 
 
 def get_summary(url=None, text=None, keyword=None, sentences_count=None):
