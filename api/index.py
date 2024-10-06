@@ -67,5 +67,10 @@ def main():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/ping')
+def home():
+    return 'pong!'
+
+
 if __name__ == "__main__":
     app.run()
