@@ -4,7 +4,7 @@ from __future__ import division, print_function, unicode_literals
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.parsers.html import HtmlParser
 from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.summarizers.text_rank import TextRankSummarizer as Summarizer
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
@@ -32,18 +32,21 @@ def get_summary(url=None, text=None, keyword=None, sentences_count=None):
         parser = HtmlParser.from_url(url, Tokenizer(LANGUAGE))
     elif text:
         parser = PlaintextParser.from_string(text, Tokenizer(LANGUAGE))
-    else:
+    elif keyword:
         mediawiki = MediaWikiAPI()
         try:
-            wiki_url = mediawiki.page(keyword, auto_suggest=False).url
+            page = mediawiki.page(keyword, auto_suggest=False)
+            parser = PlaintextParser.from_string(
+                page.content, Tokenizer(LANGUAGE))
         except exceptions.PageError:
             search_results = mediawiki.search(keyword)
             if not search_results:
                 return jsonify({"error": "No search results found"}), 404
-            wiki_url = mediawiki.page(
-                search_results[0], auto_suggest=False).url
-
-        parser = HtmlParser.from_url(wiki_url, Tokenizer(LANGUAGE))
+            page = mediawiki.page(search_results[0], auto_suggest=False)
+            parser = PlaintextParser.from_string(
+                page.content, Tokenizer(LANGUAGE))
+    else:
+        return jsonify({"error": "URL, text, or keyword is required"}), 400
 
     stemmer = Stemmer(LANGUAGE)
     summarizer = Summarizer(stemmer)
